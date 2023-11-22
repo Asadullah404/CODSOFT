@@ -1,0 +1,41 @@
+package codsoft;
+
+import java.util.Scanner;
+import java.util.Random;
+
+public class Number_Game {
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        Random random = new Random();
+
+        System.out.println("\033[32mWelcome to the Number Guessing Game!\033[0m");
+        System.out.println("Try to guess the secret number between 1 and 50.");
+
+        int secretNumber = random.nextInt(50) + 1;
+        int guessCount = 0;
+
+        while (guessCount < 5) {
+            System.out.print("\033[35nEnter your guess: ");
+            int guess = scanner.nextInt();
+
+            guessCount++;
+            System.out.println("\033[34mGuess count: " + guessCount);
+
+            if (guess == secretNumber) {
+                System.out.println("\033[32mCongratulations! You guessed the correct number in " + guessCount + " guess(es).\033[0m");
+                break;
+            } else if (guess < secretNumber) {
+                System.out.println("\033[33mYour guess is too low. Please try again.\033[0m");
+            } else {
+                System.out.println("\033[33mYour guess is too high. Please try again.\033[0m");
+            }
+        }
+
+        if (guessCount == 5) {
+            System.out.println("\033[31mYou have reached the maximum number of guesses. The secret number was: " + secretNumber + "\033[0m");
+        }
+
+        scanner.close();
+    }
+}
