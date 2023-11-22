@@ -1,0 +1,77 @@
+package codsoft;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Scanner;
+
+public class Currency_Converter {
+
+    private static final String API_KEY = "YOUR_API_KEY";
+    private static final String API_URL = "https://open.er-api.com/v6/latest/";
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Currency selection
+        System.out.println("\033[34mAvailable currencies: PKR, USD, INR\033[0m");
+
+        System.out.print("\033[33mEnter base currency: \033[0m");
+        String baseCurrency = scanner.next().toUpperCase();
+
+        System.out.print("\033[33mEnter target currency: \033[0m");
+        String targetCurrency = scanner.next().toUpperCase();
+
+        // Amount input
+        System.out.print("\033[33mEnter the amount to convert from " + baseCurrency + " to " + targetCurrency + ": \033[0m");
+        double amount = scanner.nextDouble();
+
+        // Currency conversion
+        double exchangeRate = getExchangeRate(baseCurrency, targetCurrency);
+        double convertedAmount = convertCurrency(amount, exchangeRate);
+
+        // Display result
+        System.out.println("\033[35m" + amount + " " + baseCurrency + " is equal to " + convertedAmount + " " + targetCurrency + "\033[0m");
+    }
+
+    private static double getExchangeRate(String baseCurrency, String targetCurrency) {
+        try {
+            URL url = new URL(API_URL + baseCurrency + "?apikey=" + API_KEY);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+
+            int responseCode = connection.getResponseCode();
+
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                StringBuilder response = new StringBuilder();
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+
+                return parseExchangeRate(response.toString(), targetCurrency);
+            } else {
+                System.out.println("\033[31mFailed to fetch exchange rates. HTTP error code: " + responseCode + "\033[0m");
+                System.exit(1);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return 1.0; // Default to 1:1 exchange rate in case of an error
+    }
+
+    private static double parseExchangeRate(String jsonResponse, String targetCurrency) {
+        // Parse the JSON response and extract the exchange rate for the target currency
+        // You may want to use a JSON parsing library for more robust parsing
+        String targetRateString = jsonResponse.split("\"" + targetCurrency + "\":")[1].split(",")[0];
+        return Double.parseDouble(targetRateString);
+    }
+
+    private static double convertCurrency(double amount, double exchangeRate) {
+        return amount * exchangeRate;
+    }
+}
